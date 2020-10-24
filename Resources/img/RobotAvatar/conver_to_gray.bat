@@ -1,0 +1,1 @@
+for %%i in (*.png) do convert %%i -colorspace Gray gray/%%i 

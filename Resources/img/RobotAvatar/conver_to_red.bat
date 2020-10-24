@@ -1,0 +1,1 @@
+for %%i in (*.png) do convert %%i -separate -swap 0,2 -combine red/%%i   
