@@ -61,7 +61,7 @@ void GameScene::init_menu() {
             {
             case GameScene::GameStatus::NORMAL:
                 // 玩家机器人
-                if (int(robot->status()) & int(RobotSprite::Status::PLAYER)) {
+                if (int(robot->status()) == int(RobotSprite::Status::PLAYER)) {
                     _robot = robot;
                     _menu_game->setVisible(!_menu_game->isVisible());
                     _menu_sys->setVisible(false);
@@ -116,9 +116,6 @@ void GameScene::init_menu() {
 
                 if (movable_area[will_to.y][will_to.x].first >= 0) {
                     moveto_by_tile(will_to.x, will_to.y);
-                    /*_robot->pos = will_to;*/
-                    //_robot->setPosition(_game_map_layer->convert_to_tiled_map(_robot->pos) * constants::block_size * constants::scale);
-                    
                 }
                 break;
             case GameScene::GameStatus::MOVED:
@@ -151,6 +148,10 @@ void GameScene::init_menu() {
         [&](EventCustom* event) {
             _menu_sys->setVisible(false);
             _menu_game->setVisible(false);
+            if (_game_status == GameStatus::MOVED) {
+                _robot->setPosition(_game_map_layer->convert_to_tiled_map(_robot->pos)* constants::block_size* constants::scale);
+                _game_status = GameStatus::NORMAL;
+            }
         });
     _eventDispatcher->addEventListenerWithSceneGraphPriority(event_mouse_move, this);
 }
@@ -192,13 +193,28 @@ void GameScene::install_robot_command_listener() {
     // 待命
     EventListenerCustom* event_robot_stand_by = EventListenerCustom::create("stand_by",
         [&](EventCustom* event) {
-            _robot->pos = Vec2(
+            _robot->pos = _game_map_layer->convert_to_tiled_map(Vec2(
                 int(_robot->getPosition().x) / constants::block_size / int(constants::scale),
-                int(_robot->getPosition().y) / constants::block_size / int(constants::scale));
+                int(_robot->getPosition().y) / constants::block_size / int(constants::scale)));
             _robot->set_status(RobotSprite::Status::MOVED);
             _menu_game->setVisible(false);
+            _game_status = GameStatus::NORMAL;
         });
     _eventDispatcher->addEventListenerWithSceneGraphPriority(event_robot_stand_by, this);
+
+    // 回合结束
+    EventListenerCustom* event_new_round = EventListenerCustom::create("new_round",
+        [&](EventCustom* event) {
+            for (int i = 0; i < _game_map_layer->enemy_robots.size(); i++) {
+                // auto move
+            }
+            
+            for (int i = 0; i < _game_map_layer->player_robots.size(); i++) {
+                _game_map_layer->player_robots[i]->unset_status(RobotSprite::Status::MOVED);
+            }
+            _menu_sys->setVisible(false);
+        });
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(event_new_round, this);
 }
 
 
@@ -273,9 +289,10 @@ void GameScene::moveto_by_tile(int x, int y) {
         {
             _menu_game->clear_items();
             _menu_game->setVisible(true);
-            _menu_game->setPosition(_robot->getPosition() + Vec2(constants::block_size * constants::scale, 0));
             _menu_game->add_item(GameMenu::ButtonType::STAND_BY);
             _game_status = GameStatus::MOVED;
+            this->setPosition(_robot->getPosition() - _game_map_layer->getPosition() + _game_map_layer->getContentSize() / 2);
+            //_menu_game->setPosition(_robot->getPosition() + Vec2(constants::block_size * constants::scale, 0) - (this->getPosition() - _game_map_layer->getPosition()));
         }));
     Sequence* seq = Sequence::create(actions);
     _robot->runAction(seq);

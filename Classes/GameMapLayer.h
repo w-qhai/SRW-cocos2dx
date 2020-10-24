@@ -15,7 +15,9 @@ public:
     bool init() override;
     TMXTiledMap* get_tiled_map();
     Vec2 convert_to_tiled_map(const Vec2& pos);
-    RobotSprite* create_robot(std::string texture);
+    RobotSprite* create_robot(std::string number);
+    std::vector<RobotSprite*> player_robots;
+    std::vector<RobotSprite*> enemy_robots;
 
 private:
     void map_install_touch_listener();

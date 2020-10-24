@@ -23,19 +23,19 @@ bool GameMapLayer::init() {
 
     TMXLayer* tmx_layer = _tmx_tiled_map->getLayer("layer");
 
-    RobotSprite* destiny_gundam = create_robot("img/RobotAvatar/%s/ZGMF-X42S.png");
-    destiny_gundam->set_number("ZGMF-X42S");
+    RobotSprite* destiny_gundam = create_robot("ZGMF-X42S");
     destiny_gundam->pos = Vec2(10, 11);
     destiny_gundam->_mov = 6;
     destiny_gundam->setPosition(convert_to_tiled_map(destiny_gundam->pos) * constants::block_size * constants::scale);
     destiny_gundam->set_status(RobotSprite::Status::EMENY);
-
-    RobotSprite* freedom_gundam = create_robot("img/RobotAvatar/%s/ZGMF-X20A.png");
-    freedom_gundam->set_number("ZGMF-X20A");
+    enemy_robots.push_back(destiny_gundam);
+    
+    RobotSprite* freedom_gundam = create_robot("ZGMF-X20A");
     freedom_gundam->pos = Vec2(10, 13);
     freedom_gundam->_mov = 6;
     freedom_gundam->setPosition(convert_to_tiled_map(freedom_gundam->pos) * constants::block_size * constants::scale);
     freedom_gundam->set_status(RobotSprite::Status::PLAYER);
+    player_robots.push_back(freedom_gundam);
 
     map_install_touch_listener();
     
@@ -85,11 +85,11 @@ Vec2 GameMapLayer::convert_to_tiled_map(const Vec2& pos) {
     return Vec2(pos.x, _tmx_tiled_map->getLayer("layer")->getLayerSize().height - pos.y);
 }
 
-RobotSprite* GameMapLayer::create_robot(std::string texture) {
+RobotSprite* GameMapLayer::create_robot(std::string number) {
     RobotSprite* robot = RobotSprite::create();
     robot->setAnchorPoint(Vec2(0, 1));
     robot->setScale(constants::scale);
-    robot->setTexture(texture);
+    robot->set_number(number);
     this->addChild(robot, 1);
     return robot;
 }

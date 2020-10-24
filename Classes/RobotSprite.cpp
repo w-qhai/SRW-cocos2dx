@@ -9,6 +9,7 @@ bool RobotSprite::init() {
     if (!Sprite::init()) {
         return false;
     }
+    this->_status = Status::NONE;
     robot_install_touch_listener();
     return true;
 }
@@ -51,21 +52,35 @@ std::string RobotSprite::number() {
 }
 
 void RobotSprite::set_status(Status status) {
-    switch (status)
-    {
-    case RobotSprite::Status::MOVED:
-        this->setTexture("img/RobotAvatar/gray/" + this->number() + ".png");
-        break;
-    case RobotSprite::Status::EMENY:
-        this->setTexture("img/RobotAvatar/red/" + this->number() + ".png");
-        break;
-    case RobotSprite::Status::PLAYER:
+    _status = Status(int(_status) | int(status));
+    log("%d", int(_status));
+    if (int(_status) & int(Status::PLAYER)) {
         this->setTexture("img/RobotAvatar/blue/" + this->number() + ".png");
-        break;
-    default:
-        break;
     }
-    _status = status;
+
+    if (int(_status) & int(Status::EMENY)) {
+        this->setTexture("img/RobotAvatar/red/" + this->number() + ".png");
+    }
+
+    if (int(_status) & int(Status::MOVED)) {
+        this->setTexture("img/RobotAvatar/gray/" + this->number() + ".png");
+    }
+}
+
+void RobotSprite::unset_status(Status status) {
+    _status = Status(int(_status) & ~int(status));
+
+    if (int(_status) & int(Status::PLAYER)) {
+        this->setTexture("img/RobotAvatar/blue/" + this->number() + ".png");
+    }
+
+    if (int(_status) & int(Status::EMENY)) {
+        this->setTexture("img/RobotAvatar/red/" + this->number() + ".png");
+    }
+
+    if (int(_status) & int(Status::MOVED)) {
+        this->setTexture("img/RobotAvatar/gray/" + this->number() + ".png");
+    }  
 }
 
 RobotSprite::Status RobotSprite::status() {

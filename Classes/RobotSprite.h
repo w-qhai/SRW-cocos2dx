@@ -11,6 +11,7 @@ public:
     ~RobotSprite();
 
     enum class Status {
+        NONE    = 0B00000000,
         MOVED   = 0B00000001,
         EMENY   = 0B00000010,
         PLAYER  = 0B00000100
@@ -20,6 +21,7 @@ public:
     bool init() override;
     void set_number(const std::string& number);
     void set_status(Status status);
+    void unset_status(Status status);
     Status status();
     std::string number();
 
