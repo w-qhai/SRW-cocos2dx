@@ -7,7 +7,6 @@ GameMenu::GameMenu() {
 bool GameMenu::init() {
 
     if (!Sprite::init()) {
-        log("Menu false");
         return false;
     }
 

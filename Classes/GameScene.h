@@ -19,10 +19,10 @@ public:
     CREATE_FUNC(GameScene);
     bool init() override;
 private:
-    std::vector<std::vector<std::pair<int, Vec2>>> BFS();
+    std::vector<std::vector<std::pair<int, Vec2>>> BFS(RobotSprite* robot, bool AI = false);
     void init_menu();
     void install_robot_command_listener();
-    void moveto_by_tile(int x, int y);
+    void moveto_by_tile(int x, int y, bool AI = false);
 private:
     enum class GameStatus {
         NORMAL,
@@ -34,6 +34,5 @@ private:
     GameMenu*       _menu_sys;
     RobotSprite*    _robot;
     std::vector<std::vector<std::pair<int, Vec2>>> movable_area;
-    
 };
 

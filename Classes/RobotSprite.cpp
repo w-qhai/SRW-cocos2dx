@@ -53,12 +53,11 @@ std::string RobotSprite::number() {
 
 void RobotSprite::set_status(Status status) {
     _status = Status(int(_status) | int(status));
-    log("%d", int(_status));
     if (int(_status) & int(Status::PLAYER)) {
         this->setTexture("img/RobotAvatar/blue/" + this->number() + ".png");
     }
 
-    if (int(_status) & int(Status::EMENY)) {
+    if (int(_status) & int(Status::ENEMY)) {
         this->setTexture("img/RobotAvatar/red/" + this->number() + ".png");
     }
 
@@ -74,7 +73,7 @@ void RobotSprite::unset_status(Status status) {
         this->setTexture("img/RobotAvatar/blue/" + this->number() + ".png");
     }
 
-    if (int(_status) & int(Status::EMENY)) {
+    if (int(_status) & int(Status::ENEMY)) {
         this->setTexture("img/RobotAvatar/red/" + this->number() + ".png");
     }
 

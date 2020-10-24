@@ -13,7 +13,7 @@ public:
     enum class Status {
         NONE    = 0B00000000,
         MOVED   = 0B00000001,
-        EMENY   = 0B00000010,
+        ENEMY   = 0B00000010,
         PLAYER  = 0B00000100
     };
 

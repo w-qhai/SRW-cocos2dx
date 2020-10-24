@@ -174,7 +174,7 @@ void GameScene::install_robot_command_listener() {
             const int width = layer->getLayerSize().width;
             const int height = layer->getLayerSize().height;
 
-            movable_area = BFS();
+            movable_area = BFS(_robot);
             
             for (int h = 0; h < height; h++) {
                 for (int w = 0; w < width; w++) {
@@ -204,9 +204,37 @@ void GameScene::install_robot_command_listener() {
 
     // 回合结束
     EventListenerCustom* event_new_round = EventListenerCustom::create("new_round",
-        [&](EventCustom* event) {
+        [=](EventCustom* event) {
             for (int i = 0; i < _game_map_layer->enemy_robots.size(); i++) {
                 // auto move
+                _robot = _game_map_layer->enemy_robots[i];
+                movable_area = BFS(_robot, true);
+                RobotSprite* to = _game_map_layer->player_robots[0];
+                TMXTiledMap* tiled_map = this->_game_map_layer->get_tiled_map();
+                TMXLayer* layer = tiled_map->getLayer("layer");
+                const int width = layer->getLayerSize().width;
+                const int height = layer->getLayerSize().height;
+                //for (int h = 0; h < height; h++) {
+                //    for (int w = 0; w < width; w++) {
+                //        Sprite* sprite = layer->getTileAt(Vec2(w, h));
+                //        if (movable_area[h][w].first >= 0) {
+                //            int gid = layer->getTileGIDAt(Vec2(w, h));
+                //            Value value = tiled_map->getPropertiesForGID(gid);
+                //            Label* label = Label::create();
+                //            label->setString(String::createWithFormat("(%.0f,%.0f)", movable_area[h][w].second.x, movable_area[h][w].second.y)->_string);
+                //            label->setPosition(sprite->getPosition());
+                //            label->setTextColor(Color4B::RED);
+                //            label->setAnchorPoint(Vec2(0, 0));
+                //            label->setScale(0.4);
+                //            tiled_map->addChild(label, 10);
+                //        }
+                //        else {
+                //            sprite->setVisible(false);
+                //        }
+                //    }
+                //}
+
+                moveto_by_tile(movable_area[int(to->pos.y)][int(to->pos.x)].second.x, movable_area[int(to->pos.y)][int(to->pos.x)].second.y, true);
             }
             
             for (int i = 0; i < _game_map_layer->player_robots.size(); i++) {
@@ -218,7 +246,7 @@ void GameScene::install_robot_command_listener() {
 }
 
 
-std::vector<std::vector<std::pair<int, Vec2>>> GameScene::BFS() {
+std::vector<std::vector<std::pair<int, Vec2>>> GameScene::BFS(RobotSprite* robot, bool AI) {
 
     /*
     * 根据当前选中的机器人的位置，类型，机动，寻找可移动区域
@@ -226,8 +254,8 @@ std::vector<std::vector<std::pair<int, Vec2>>> GameScene::BFS() {
 
     static int dir[4][2] = { {0, -1}, {1, 0}, {0, 1}, {-1, 0} };
 
-    short mov = _robot->_mov;
-    Vec2 pos = _robot->pos;
+    short mov = AI ? 8 : robot->_mov;
+    Vec2 pos = robot->pos;
     std::string type = "land";
 
     std::queue<Vec2> path;
@@ -255,7 +283,24 @@ std::vector<std::vector<std::pair<int, Vec2>>> GameScene::BFS() {
             if (to.y > 0 && to.y < height && to.x > 0 && to.x < width) {
                 const int gid = layer->getTileGIDAt(Vec2(to.x, to.y));
                 Value value = tiled_map->getPropertiesForGID(gid);
-                const int cost = value.asValueMap().at(type).asInt();
+                int cost = value.asValueMap().at(type).asInt();
+
+                if (int(robot->status()) & int(RobotSprite::Status::PLAYER)) {
+                    for (RobotSprite* robot : _game_map_layer->enemy_robots) {
+                        if (to.x == robot->pos.x && to.y == robot->pos.y) {
+                            cost = 999;
+                        }
+                    }
+                }
+                else if (int(robot->status()) & int(RobotSprite::Status::ENEMY)) {
+                    for (RobotSprite* robot : _game_map_layer->player_robots) {
+                        if (to.x == robot->pos.x && to.y == robot->pos.y) {
+                            cost = 999;
+                            movable_area[to.y][to.x] = { movable_area[from.y][from.x].first - cost, from };
+                        }
+                    }
+                }
+
                 if (movable_area[from.y][from.x].first - cost > movable_area[to.y][to.x].first) {
                     path.push(to);
                     movable_area[to.y][to.x] = { movable_area[from.y][from.x].first - cost, from };
@@ -266,7 +311,7 @@ std::vector<std::vector<std::pair<int, Vec2>>> GameScene::BFS() {
     return movable_area;
 }
 
-void GameScene::moveto_by_tile(int x, int y) {
+void GameScene::moveto_by_tile(int x, int y, bool AI) {
     std::stack<Vec2> path;
     Vec2 now(x, y);
     while (movable_area[now.y][now.x].second != now) {
@@ -274,9 +319,10 @@ void GameScene::moveto_by_tile(int x, int y) {
         now = movable_area[now.y][now.x].second;
     }
     const double length = path.size();
+    int step = 0;
     Vector<FiniteTimeAction*> actions;
     actions.pushBack(MoveBy::create(0.5, Vec2(0, constants::block_size * constants::scale / 2))); // 启动动作
-    while (!path.empty()) {
+    while (!path.empty() && step++ < _robot->_mov) {
         MoveTo* move_seq = MoveTo::create(path.size() / length / 5 + 0.03, // 移动速度逐渐加快
             _game_map_layer->convert_to_tiled_map(Vec2(path.top().x, path.top().y - 0.5)) * constants::block_size * constants::scale);
         path.pop();
@@ -286,10 +332,15 @@ void GameScene::moveto_by_tile(int x, int y) {
     // 结束时 变灰色
     actions.pushBack(CallFunc::create([=]() 
         {
-            _menu_game->clear_items();
-            _menu_game->setVisible(true);
-            _menu_game->add_item(GameMenu::ButtonType::STAND_BY);
-            _game_status = GameStatus::MOVED;
+            if (!AI) {
+                _menu_game->clear_items();
+                _menu_game->setVisible(true);
+                _menu_game->add_item(GameMenu::ButtonType::STAND_BY);
+                _game_status = GameStatus::MOVED;
+            }
+            else {
+                _robot->set_status(RobotSprite::Status::MOVED);
+            }
             // 聚焦机器人
             _game_map_layer->setPosition(
                 -((_robot->getPosition() - this->getPosition()) - this->getContentSize() / 2)

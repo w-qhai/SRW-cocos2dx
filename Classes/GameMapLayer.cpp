@@ -27,7 +27,7 @@ bool GameMapLayer::init() {
     destiny_gundam->pos = Vec2(10, 11);
     destiny_gundam->_mov = 6;
     destiny_gundam->setPosition(convert_to_tiled_map(destiny_gundam->pos) * constants::block_size * constants::scale);
-    destiny_gundam->set_status(RobotSprite::Status::EMENY);
+    destiny_gundam->set_status(RobotSprite::Status::ENEMY);
     enemy_robots.push_back(destiny_gundam);
     
     RobotSprite* freedom_gundam = create_robot("ZGMF-X20A");
