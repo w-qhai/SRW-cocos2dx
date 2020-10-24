@@ -54,11 +54,15 @@ void GameScene::init_menu() {
             switch (_game_status)
             {
             case GameScene::GAME_STATUS::NORMAL:
-                _robot = robot;
-                _menu_game->setVisible(!_menu_game->isVisible());
-                _menu_sys->setVisible(false);
-                _menu_game->set_robot(_robot);
-                _menu_game->setPosition(param->pos_x + constants::scale * constants::block_size, param->pos_y + constants::scale * constants::block_size);
+                // 玩家机器人
+                log("%d", int(robot->status()));
+                if (int(robot->status()) & int(RobotSprite::STATUS::PLAYER)) {
+                    _robot = robot;
+                    _menu_game->setVisible(!_menu_game->isVisible());
+                    _menu_sys->setVisible(false);
+                    _menu_game->set_robot(_robot);
+                    _menu_game->setPosition(param->pos_x + constants::scale * constants::block_size, param->pos_y + constants::scale * constants::block_size);
+                }
                 break;
             case GameScene::GAME_STATUS::MOVING:
                 break;
@@ -105,6 +109,7 @@ void GameScene::init_menu() {
                     moveto_by_tile(will_to.x, will_to.y);
                     _robot->pos = will_to;
                     //_robot->setPosition(_game_map_layer->convert_to_tiled_map(_robot->pos) * constants::block_size * constants::scale);
+                    
                 }
                 break;
             default:
@@ -246,6 +251,12 @@ void GameScene::moveto_by_tile(int x, int y) {
         actions.pushBack(move_seq);
     }
     actions.pushBack(MoveBy::create(0.5, Vec2(0, -constants::block_size * constants::scale / 2))); // 降落动作
+    // 结束时 变灰色
+    actions.pushBack(CallFunc::create([&]() 
+        {
+            _robot->set_status(RobotSprite::STATUS::MOVED);
+        }));
     Sequence* seq = Sequence::create(actions);
     _robot->runAction(seq);
+    
 }

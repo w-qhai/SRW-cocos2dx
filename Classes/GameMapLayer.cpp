@@ -23,16 +23,20 @@ bool GameMapLayer::init() {
 
     TMXLayer* tmx_layer = _tmx_tiled_map->getLayer("layer");
 
-    RobotSprite* robot = RobotSprite::create();
-    robot->setAnchorPoint(Vec2(0, 1));
-    robot->setScale(constants::scale);
+    RobotSprite* destiny_gundam = create_robot("img/RobotAvatar/%s/ZGMF-X42S.png");
+    destiny_gundam->set_number("ZGMF-X42S");
+    destiny_gundam->pos = Vec2(10, 11);
+    destiny_gundam->_mov = 6;
+    destiny_gundam->setPosition(convert_to_tiled_map(destiny_gundam->pos) * constants::block_size * constants::scale);
+    destiny_gundam->set_status(RobotSprite::STATUS::EMENY);
 
-    robot->setTexture("img/RobotAvatar/ZGMF-X42S.png");
-    robot->set_name("命运高达");
-    robot->pos = Vec2(10, 11);
-    robot->_mov = 6;
-    robot->setPosition(convert_to_tiled_map(robot->pos) * constants::block_size * constants::scale);
-    this->addChild(robot, + 1);
+    RobotSprite* freedom_gundam = create_robot("img/RobotAvatar/%s/ZGMF-X20A.png");
+    freedom_gundam->set_number("ZGMF-X20A");
+    freedom_gundam->pos = Vec2(10, 13);
+    freedom_gundam->_mov = 6;
+    freedom_gundam->setPosition(convert_to_tiled_map(freedom_gundam->pos) * constants::block_size * constants::scale);
+    freedom_gundam->set_status(RobotSprite::STATUS::PLAYER);
+
     map_install_touch_listener();
     
     return true;
@@ -63,7 +67,6 @@ void GameMapLayer::map_install_touch_listener() {
     };
 
     move_screen_touch_listener->onTouchEnded = [this](Touch* touch, Event* event) {
-        // TODO
         if (!_drag) {
             EventCustom event("click_empty");
             event.setUserData((void*)&(touch->getLocation()));
@@ -82,6 +85,11 @@ Vec2 GameMapLayer::convert_to_tiled_map(const Vec2& pos) {
     return Vec2(pos.x, _tmx_tiled_map->getLayer("layer")->getLayerSize().height - pos.y);
 }
 
-//Vec2 GameMapLayer::convert_from_tiled_map(const Vec2& pos) {
-//    return Vec2(pos.x, _tmx_tiled_map->getLayer("layer")->getLayerSize().height - pos.y);
-//}
+RobotSprite* GameMapLayer::create_robot(std::string texture) {
+    RobotSprite* robot = RobotSprite::create();
+    robot->setAnchorPoint(Vec2(0, 1));
+    robot->setScale(constants::scale);
+    robot->setTexture(texture);
+    this->addChild(robot, 1);
+    return robot;
+}

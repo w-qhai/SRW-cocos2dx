@@ -42,11 +42,32 @@ void RobotSprite::robot_install_touch_listener() {
     _eventDispatcher->addEventListenerWithSceneGraphPriority(click_robot_listener, this);
 }
 
-void RobotSprite::set_name(const String& name) {
-    _name = name;
+void RobotSprite::set_number(const std::string& number) {
+    _number = number;
 }
 
-String RobotSprite::name() {
-    return _name;
+std::string RobotSprite::number() {
+    return _number;
 }
 
+void RobotSprite::set_status(STATUS status) {
+    switch (status)
+    {
+    case RobotSprite::STATUS::MOVED:
+        this->setTexture("img/RobotAvatar/gray/" + this->number() + ".png");
+        break;
+    case RobotSprite::STATUS::EMENY:
+        this->setTexture("img/RobotAvatar/red/" + this->number() + ".png");
+        break;
+    case RobotSprite::STATUS::PLAYER:
+        this->setTexture("img/RobotAvatar/blue/" + this->number() + ".png");
+        break;
+    default:
+        break;
+    }
+    _status = status;
+}
+
+RobotSprite::STATUS RobotSprite::status() {
+    return _status;
+}

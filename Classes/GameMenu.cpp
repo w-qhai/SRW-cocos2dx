@@ -35,14 +35,14 @@ bool GameMenu::init() {
         [&](Ref* sender) {
 
         }));
-    _menu_items.pushBack(MenuItemFont::create("部队",
+    _menu_items.pushBack(MenuItemFont::create("部队表",
         [&](Ref* sender) {
 
         }));
 
     _menu = Menu::create();
     _menu->setPosition(this->_position);
-    _menu->setSwallowsTouches(false);
+    //_menu->setSwallowsTouches(false);
     this->addChild(_menu);
 
     return true;
