@@ -28,14 +28,14 @@ bool GameMapLayer::init() {
     destiny_gundam->pos = Vec2(10, 11);
     destiny_gundam->_mov = 6;
     destiny_gundam->setPosition(convert_to_tiled_map(destiny_gundam->pos) * constants::block_size * constants::scale);
-    destiny_gundam->set_status(RobotSprite::STATUS::EMENY);
+    destiny_gundam->set_status(RobotSprite::Status::EMENY);
 
     RobotSprite* freedom_gundam = create_robot("img/RobotAvatar/%s/ZGMF-X20A.png");
     freedom_gundam->set_number("ZGMF-X20A");
     freedom_gundam->pos = Vec2(10, 13);
     freedom_gundam->_mov = 6;
     freedom_gundam->setPosition(convert_to_tiled_map(freedom_gundam->pos) * constants::block_size * constants::scale);
-    freedom_gundam->set_status(RobotSprite::STATUS::PLAYER);
+    freedom_gundam->set_status(RobotSprite::Status::PLAYER);
 
     map_install_touch_listener();
     

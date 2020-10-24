@@ -24,9 +24,10 @@ private:
     void install_robot_command_listener();
     void moveto_by_tile(int x, int y);
 private:
-    enum class GAME_STATUS {
+    enum class GameStatus {
         NORMAL,
-        MOVING
+        PREMOVE,
+        MOVED
     } _game_status;
     GameMapLayer*   _game_map_layer;
     GameMenu*       _menu_game;

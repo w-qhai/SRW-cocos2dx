@@ -31,9 +31,16 @@ bool GameMenu::init() {
 
         }));
 
+    _menu_items.pushBack(MenuItemFont::create("待命",
+        [&](Ref* sender) {
+            EventCustom event("stand_by");
+            _eventDispatcher->dispatchEvent(&event);
+        }));
+
     _menu_items.pushBack(MenuItemFont::create("回合结束",
         [&](Ref* sender) {
-
+            EventCustom event("new_round");
+            _eventDispatcher->dispatchEvent(&event);
         }));
     _menu_items.pushBack(MenuItemFont::create("部队表",
         [&](Ref* sender) {
@@ -56,13 +63,13 @@ void GameMenu::clear_items() {
     _menu->removeAllChildren();
 }
 
-void GameMenu::add_item(BUTTON_TYPE type) {
+void GameMenu::add_item(ButtonType type) {
     _menu->addChild(_menu_items.at(static_cast<int>(type)));
     this->setContentSize(Size(_menu_width, _menu->getChildrenCount() * 50));
     _menu_items.at(static_cast<int>(type))->setPosition(_menu_width / 2, (_menu->getChildrenCount() * 50 - 25));
 }
 
-void GameMenu::remove_item(BUTTON_TYPE type) {
+void GameMenu::remove_item(ButtonType type) {
     _menu->removeChild(_menu_items.at(static_cast<int>(type)), false);
 }
 

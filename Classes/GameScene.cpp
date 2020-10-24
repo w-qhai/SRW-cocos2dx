@@ -13,7 +13,7 @@ bool GameScene::init() {
     if (!Scene::init()) {
         return false;
     }
-    _game_status = GAME_STATUS::NORMAL;
+    _game_status = GameStatus::NORMAL;
     _robot = nullptr;
     _game_map_layer = GameMapLayer::create();
     this->addChild(_game_map_layer);
@@ -34,9 +34,9 @@ void GameScene::init_menu() {
     _menu_game = GameMenu::create();
     _menu_game->setVisible(false);
     _menu_game->set_menu_width(100);
-    _menu_game->add_item(GameMenu::BUTTON_TYPE::MOVE);
-    _menu_game->add_item(GameMenu::BUTTON_TYPE::STAUTS);
-    _menu_game->add_item(GameMenu::BUTTON_TYPE::ATTACK);
+    _menu_game->add_item(GameMenu::ButtonType::MOVE);
+    _menu_game->add_item(GameMenu::ButtonType::STAUTS);
+    _menu_game->add_item(GameMenu::ButtonType::ATTACK);
     this->addChild(_menu_game, 0);
      
     /*
@@ -50,13 +50,18 @@ void GameScene::init_menu() {
         [&](EventCustom* event) {
             const param_types::ClickRobot* param = static_cast<param_types::ClickRobot*>(event->getUserData());
             RobotSprite* robot = static_cast<RobotSprite*>(param->who);
-
+            /*
+                判断机器人状态
+            */
+            _menu_game->clear_items();
+            _menu_game->add_item(GameMenu::ButtonType::MOVE);
+            _menu_game->add_item(GameMenu::ButtonType::STAUTS);
+            _menu_game->add_item(GameMenu::ButtonType::ATTACK);
             switch (_game_status)
             {
-            case GameScene::GAME_STATUS::NORMAL:
+            case GameScene::GameStatus::NORMAL:
                 // 玩家机器人
-                log("%d", int(robot->status()));
-                if (int(robot->status()) & int(RobotSprite::STATUS::PLAYER)) {
+                if (int(robot->status()) & int(RobotSprite::Status::PLAYER)) {
                     _robot = robot;
                     _menu_game->setVisible(!_menu_game->isVisible());
                     _menu_sys->setVisible(false);
@@ -64,7 +69,10 @@ void GameScene::init_menu() {
                     _menu_game->setPosition(param->pos_x + constants::scale * constants::block_size, param->pos_y + constants::scale * constants::block_size);
                 }
                 break;
-            case GameScene::GAME_STATUS::MOVING:
+            case GameScene::GameStatus::PREMOVE:
+                break;
+            case GameScene::GameStatus::MOVED:
+                // attack
                 break;
             default:
                 break;
@@ -75,8 +83,8 @@ void GameScene::init_menu() {
     _menu_sys = GameMenu::create();
     _menu_sys->setVisible(false);
     _menu_sys->set_menu_width(150);
-    _menu_sys->add_item(GameMenu::BUTTON_TYPE::NEW_ROUND);
-    _menu_sys->add_item(GameMenu::BUTTON_TYPE::TEAM);
+    _menu_sys->add_item(GameMenu::ButtonType::NEW_ROUND);
+    _menu_sys->add_item(GameMenu::ButtonType::TEAM);
     this->addChild(_menu_sys, 0);
 
     /*
@@ -91,26 +99,32 @@ void GameScene::init_menu() {
     EventListenerCustom* event_click_empty = EventListenerCustom::create("click_empty",
         [&](EventCustom* event) {
             const Vec2* pos = static_cast<Vec2*>(event->getUserData());
+
             Vec2 tpos = *pos - _game_map_layer->getPosition();
             Vec2 will_to;
             switch (_game_status)
             {
-            case GameScene::GAME_STATUS::NORMAL:
+            case GameScene::GameStatus::NORMAL:
                 _menu_sys->setVisible(!_menu_sys->isVisible());
                 _menu_game->setVisible(false);
                 _menu_sys->setPosition(pos->x, pos->y);
                 break;
-            case GameScene::GAME_STATUS::MOVING:
+            case GameScene::GameStatus::PREMOVE:
                 tpos.x = int(tpos.x) / constants::block_size / int(constants::scale);
                 tpos.y = int(tpos.y) / constants::block_size / int(constants::scale) + 1;
                 will_to = _game_map_layer->convert_to_tiled_map(tpos);
 
                 if (movable_area[will_to.y][will_to.x].first >= 0) {
                     moveto_by_tile(will_to.x, will_to.y);
-                    _robot->pos = will_to;
+                    /*_robot->pos = will_to;*/
                     //_robot->setPosition(_game_map_layer->convert_to_tiled_map(_robot->pos) * constants::block_size * constants::scale);
                     
                 }
+                break;
+            case GameScene::GameStatus::MOVED:
+                // 返回原地
+                _menu_game->setVisible(false);
+                _robot->setPosition(_game_map_layer->convert_to_tiled_map(_robot->pos) * constants::block_size * constants::scale);
                 break;
             default:
                 break;
@@ -126,7 +140,7 @@ void GameScene::init_menu() {
                     sprite->setVisible(true);
                 }
             }
-            _game_status = GAME_STATUS::NORMAL;
+            _game_status = GameStatus::NORMAL;
         });
     _eventDispatcher->addEventListenerWithSceneGraphPriority(event_click_empty, this);
 
@@ -146,9 +160,10 @@ void GameScene::install_robot_command_listener() {
     * 移动命令:
     *   robot移动，将不可移动位置隐藏(变灰色)
     */
+    // 移动
     EventListenerCustom* event_robot_move = EventListenerCustom::create("robot_move",
         [&](EventCustom* event) {
-            _game_status = GAME_STATUS::MOVING;
+            _game_status = GameStatus::PREMOVE;
 
             _menu_sys->setVisible(false);
             _menu_game->setVisible(false);
@@ -164,15 +179,7 @@ void GameScene::install_robot_command_listener() {
                 for (int w = 0; w < width; w++) {
                     Sprite* sprite = layer->getTileAt(Vec2(w, h));
                     if (movable_area[h][w].first >= 0) {
-                        /*int gid = layer->getTileGIDAt(Vec2(w, h));
-                        Value value = tiled_map->getPropertiesForGID(gid);
-                        Label* label = Label::create();
-                        label->setString(String::createWithFormat("%d %.0f %.0f", movable_area[h][w].first, movable_area[h][w].second.x, movable_area[h][w].second.y)->_string);
-                        label->setPosition(sprite->getPosition());
-                        label->setTextColor(Color4B::RED);
-                        label->setAnchorPoint(Vec2(0, 0));
-                        label->setScale(0.5);
-                        tiled_map->addChild(label, 10);*/
+
                     }
                     else {
                         sprite->setVisible(false);
@@ -182,6 +189,16 @@ void GameScene::install_robot_command_listener() {
         });
     _eventDispatcher->addEventListenerWithSceneGraphPriority(event_robot_move, this);
 
+    // 待命
+    EventListenerCustom* event_robot_stand_by = EventListenerCustom::create("stand_by",
+        [&](EventCustom* event) {
+            _robot->pos = Vec2(
+                int(_robot->getPosition().x) / constants::block_size / int(constants::scale),
+                int(_robot->getPosition().y) / constants::block_size / int(constants::scale));
+            _robot->set_status(RobotSprite::Status::MOVED);
+            _menu_game->setVisible(false);
+        });
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(event_robot_stand_by, this);
 }
 
 
@@ -254,9 +271,12 @@ void GameScene::moveto_by_tile(int x, int y) {
     // 结束时 变灰色
     actions.pushBack(CallFunc::create([&]() 
         {
-            _robot->set_status(RobotSprite::STATUS::MOVED);
+            _menu_game->clear_items();
+            _menu_game->setVisible(true);
+            _menu_game->setPosition(_robot->getPosition() + Vec2(constants::block_size * constants::scale, 0));
+            _menu_game->add_item(GameMenu::ButtonType::STAND_BY);
+            _game_status = GameStatus::MOVED;
         }));
     Sequence* seq = Sequence::create(actions);
     _robot->runAction(seq);
-    
 }

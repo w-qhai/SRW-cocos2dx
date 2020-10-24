@@ -10,7 +10,7 @@ public:
     RobotSprite();
     ~RobotSprite();
 
-    enum class STATUS {
+    enum class Status {
         MOVED   = 0B00000001,
         EMENY   = 0B00000010,
         PLAYER  = 0B00000100
@@ -19,8 +19,8 @@ public:
     CREATE_FUNC(RobotSprite);
     bool init() override;
     void set_number(const std::string& number);
-    void set_status(STATUS status);
-    STATUS status();
+    void set_status(Status status);
+    Status status();
     std::string number();
 
     Vec2 pos;
@@ -29,7 +29,7 @@ private:
     void robot_install_touch_listener();
 
 private:
-    STATUS _status;
+    Status _status;
     std::string _number;
     bool _is_moving;
 };

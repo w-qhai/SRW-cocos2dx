@@ -9,10 +9,11 @@ class GameMenu : public Sprite
 {
 public:
 
-    enum class BUTTON_TYPE {
+    enum class ButtonType {
         MOVE,
         STAUTS,
         ATTACK,
+        STAND_BY,
 
         NEW_ROUND,
         TEAM
@@ -24,8 +25,8 @@ public:
     CREATE_FUNC(GameMenu);
     bool init() override;
     void clear_items();
-    void add_item(BUTTON_TYPE type);
-    void remove_item(BUTTON_TYPE type);
+    void add_item(ButtonType type);
+    void remove_item(ButtonType type);
     void set_menu_width(int width);
     void set_robot(RobotSprite* robot);
 private:

@@ -50,16 +50,16 @@ std::string RobotSprite::number() {
     return _number;
 }
 
-void RobotSprite::set_status(STATUS status) {
+void RobotSprite::set_status(Status status) {
     switch (status)
     {
-    case RobotSprite::STATUS::MOVED:
+    case RobotSprite::Status::MOVED:
         this->setTexture("img/RobotAvatar/gray/" + this->number() + ".png");
         break;
-    case RobotSprite::STATUS::EMENY:
+    case RobotSprite::Status::EMENY:
         this->setTexture("img/RobotAvatar/red/" + this->number() + ".png");
         break;
-    case RobotSprite::STATUS::PLAYER:
+    case RobotSprite::Status::PLAYER:
         this->setTexture("img/RobotAvatar/blue/" + this->number() + ".png");
         break;
     default:
@@ -68,6 +68,6 @@ void RobotSprite::set_status(STATUS status) {
     _status = status;
 }
 
-RobotSprite::STATUS RobotSprite::status() {
+RobotSprite::Status RobotSprite::status() {
     return _status;
 }
