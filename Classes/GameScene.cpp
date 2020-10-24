@@ -274,7 +274,6 @@ void GameScene::moveto_by_tile(int x, int y) {
         now = movable_area[now.y][now.x].second;
     }
     const double length = path.size();
-
     Vector<FiniteTimeAction*> actions;
     actions.pushBack(MoveBy::create(0.5, Vec2(0, constants::block_size * constants::scale / 2))); // 启动动作
     while (!path.empty()) {
@@ -285,14 +284,17 @@ void GameScene::moveto_by_tile(int x, int y) {
     }
     actions.pushBack(MoveBy::create(0.5, Vec2(0, -constants::block_size * constants::scale / 2))); // 降落动作
     // 结束时 变灰色
-    actions.pushBack(CallFunc::create([&]() 
+    actions.pushBack(CallFunc::create([=]() 
         {
             _menu_game->clear_items();
             _menu_game->setVisible(true);
             _menu_game->add_item(GameMenu::ButtonType::STAND_BY);
             _game_status = GameStatus::MOVED;
-            this->setPosition(_robot->getPosition() - _game_map_layer->getPosition() + _game_map_layer->getContentSize() / 2);
-            //_menu_game->setPosition(_robot->getPosition() + Vec2(constants::block_size * constants::scale, 0) - (this->getPosition() - _game_map_layer->getPosition()));
+            // 聚焦机器人
+            _game_map_layer->setPosition(
+                -((_robot->getPosition() - this->getPosition()) - this->getContentSize() / 2)
+            );
+            _menu_game->setPosition(_robot->getPosition() + Vec2(constants::block_size * constants::scale, 0) - (this->getPosition() - _game_map_layer->getPosition()));
         }));
     Sequence* seq = Sequence::create(actions);
     _robot->runAction(seq);
