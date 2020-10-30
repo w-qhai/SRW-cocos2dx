@@ -25,13 +25,8 @@ void RobotSprite::robot_install_touch_listener() {
     click_robot_listener->onTouchBegan = [this](Touch* touch, Event* event) {
         if (this->getBoundingBox().containsPoint(touch->getLocation() - this->getParent()->getPosition())) {
             EventCustom event("click_robot");
-            param_types::ClickRobot param;
-
-            param.who   = (void*)this;
-            param.pos_x = touch->getLocation().x;
-            param.pos_y = touch->getLocation().y;
-
-            event.setUserData((void*)&param);
+            std::tuple<RobotSprite*, Vec2> param(this, touch->getLocation());
+            event.setUserData(reinterpret_cast<void*>(&param));
             _eventDispatcher->dispatchEvent(&event);
             return true;
         }

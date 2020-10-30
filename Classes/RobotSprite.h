@@ -2,6 +2,7 @@
 
 #include "cocos2d.h"
 #include "constants.h"
+#include <tuple>
 using namespace cocos2d;
 
 class RobotSprite : public Sprite
@@ -22,7 +23,7 @@ public:
     void set_number(const std::string& number);
     void set_status(Status status);
     void unset_status(Status status);
-    Status status();
+    Status  status();
     std::string number();
 
     Vec2 pos;

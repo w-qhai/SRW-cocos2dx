@@ -2,6 +2,9 @@
 namespace constants {
     extern double scale;
     extern int block_size;
+    extern int mov_max;
+    extern int PLAYER;
+    extern int ENEMY;
 }
 
 namespace param_types {

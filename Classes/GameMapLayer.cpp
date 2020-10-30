@@ -23,22 +23,15 @@ bool GameMapLayer::init() {
 
     TMXLayer* tmx_layer = _tmx_tiled_map->getLayer("layer");
 
-    RobotSprite* destiny_gundam = create_robot("ZGMF-X42S");
-    destiny_gundam->pos = Vec2(10, 11);
-    destiny_gundam->_mov = 6;
-    destiny_gundam->setPosition(convert_to_tiled_map(destiny_gundam->pos) * constants::block_size * constants::scale);
-    destiny_gundam->set_status(RobotSprite::Status::ENEMY);
-    enemy_robots.push_back(destiny_gundam);
-    
-    RobotSprite* freedom_gundam = create_robot("ZGMF-X20A");
-    freedom_gundam->pos = Vec2(10, 13);
-    freedom_gundam->_mov = 6;
-    freedom_gundam->setPosition(convert_to_tiled_map(freedom_gundam->pos) * constants::block_size * constants::scale);
-    freedom_gundam->set_status(RobotSprite::Status::PLAYER);
-    player_robots.push_back(freedom_gundam);
 
-    map_install_touch_listener();
+    RobotSprite* destiny_gundam1 = create_robot("ZGMF-X42S", Vec2(4, 18), RobotSprite::Status::ENEMY);
+    RobotSprite* destiny_gundam2 = create_robot("ZGMF-X42S", Vec2(5, 19), RobotSprite::Status::ENEMY);
+    RobotSprite* destiny_gundam3 = create_robot("ZGMF-X42S", Vec2(5, 18), RobotSprite::Status::ENEMY);
     
+    RobotSprite* freedom_gundam1 = create_robot("ZGMF-X20A", Vec2(6, 15), RobotSprite::Status::PLAYER);
+    RobotSprite* freedom_gundam2 = create_robot("ZGMF-X20A", Vec2(7, 15), RobotSprite::Status::PLAYER);
+    
+    map_install_touch_listener();
     return true;
 }
 
@@ -61,7 +54,7 @@ void GameMapLayer::map_install_touch_listener() {
         this->setPosition(this->getPosition() - Vec2(dx, dy));
         _drag = true;
         if (_drag) {
-            EventCustom event("mouse_move");
+            EventCustom event("drag_screen");
             _eventDispatcher->dispatchEvent(&event);
         }
     };
@@ -85,11 +78,32 @@ Vec2 GameMapLayer::convert_to_tiled_map(const Vec2& pos) {
     return Vec2(pos.x, _tmx_tiled_map->getLayer("layer")->getLayerSize().height - pos.y);
 }
 
-RobotSprite* GameMapLayer::create_robot(std::string number) {
+RobotSprite* GameMapLayer::create_robot(std::string number, Vec2 pos, RobotSprite::Status status) {
     RobotSprite* robot = RobotSprite::create();
     robot->setAnchorPoint(Vec2(0, 1));
+    robot->pos = pos;
     robot->setScale(constants::scale);
     robot->set_number(number);
+    robot->setPosition(convert_to_tiled_map(robot->pos) * constants::block_size * constants::scale);
+    robot->set_status(status);
+    switch (status)
+    {
+    case RobotSprite::Status::NONE:
+        break;
+    case RobotSprite::Status::MOVED:
+        break;
+    case RobotSprite::Status::ENEMY:
+        enemy_robots.push_back(robot);
+        break;
+    case RobotSprite::Status::PLAYER:
+        player_robots.push_back(robot);
+        break;
+    default:
+        break;
+    }
+
+    // get robot data from config
+    robot->_mov = 7;
     this->addChild(robot, 1);
     return robot;
 }

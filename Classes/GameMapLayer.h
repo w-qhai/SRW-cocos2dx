@@ -15,7 +15,7 @@ public:
     bool init() override;
     TMXTiledMap* get_tiled_map();
     Vec2 convert_to_tiled_map(const Vec2& pos);
-    RobotSprite* create_robot(std::string number);
+    RobotSprite* create_robot(std::string number, Vec2 pos, RobotSprite::Status status);
     std::vector<RobotSprite*> player_robots;
     std::vector<RobotSprite*> enemy_robots;
 
