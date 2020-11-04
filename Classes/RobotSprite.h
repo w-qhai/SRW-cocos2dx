@@ -28,6 +28,9 @@ public:
 
     Vec2 pos;
     int _mov;
+
+
+
 private:
     void robot_install_touch_listener();
 

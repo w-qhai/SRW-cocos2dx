@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cocos2d.h"
+#include "WeaponChooseLayer.h"
 #include "GameMapLayer.h"
 #include "RobotSprite.h"
 #include "GameMenu.h"
@@ -27,10 +28,14 @@ private:
     void focuse_on(RobotSprite* robot);
     void load_map(int chapter);
 
+    //
     void click_robot(EventCustom* event);
     void click_empty(EventCustom* event);
     void drag_screen(EventCustom* event);
     void robot_move(EventCustom* event);
+
+    // 命令
+    void attack(EventCustom* event);
     void stand_by(EventCustom* event);
     void new_round(EventCustom* event);
     void after_enemy_robot_moved(EventCustom* event);
@@ -40,7 +45,10 @@ private:
         PREMOVE,
         MOVED
     } _game_status;
+
     GameMapLayer*   _game_map_layer;
+    WeaponChooseLayer* _weapon_choose_layer;
+
     GameMenu*       _menu_game;
     GameMenu*       _menu_sys;
     RobotSprite*    _robot;

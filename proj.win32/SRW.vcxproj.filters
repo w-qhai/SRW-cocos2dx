@@ -42,6 +42,9 @@
     <ClCompile Include="..\Classes\GameMenu.cpp">
       <Filter>src\Obj</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\WeaponChooseLayer.cpp">
+      <Filter>src\Layer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -64,6 +67,9 @@
     </ClInclude>
     <ClInclude Include="..\Classes\GameMenu.h">
       <Filter>src\Obj</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\WeaponChooseLayer.h">
+      <Filter>src\Layer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

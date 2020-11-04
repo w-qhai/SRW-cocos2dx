@@ -14,6 +14,10 @@ bool GameScene::init() {
     if (!Scene::init()) {
         return false;
     }
+    _weapon_choose_layer = WeaponChooseLayer::create();
+    _weapon_choose_layer->setVisible(false);
+    this->addChild(_weapon_choose_layer);
+
     _game_status = GameStatus::NORMAL;
     _robot = nullptr;
     load_map(1);
@@ -38,6 +42,10 @@ bool GameScene::init() {
     init_menu();
     install_robot_command_listener();
     install_scene_listener();
+
+    _weapon_choose_layer->setVisible(true);
+    _weapon_choose_layer->setZOrder(_game_map_layer->getZOrder() + 1);
+
     return true;
 }
 
@@ -87,6 +95,12 @@ void GameScene::install_robot_command_listener() {
             this->robot_move(event);
         });
     _eventDispatcher->addEventListenerWithSceneGraphPriority(event_robot_move, this);
+
+    EventListenerCustom* event_attack = EventListenerCustom::create("attack",
+        [&](EventCustom* event) {
+            this->attack(event);
+        });
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(event_attack, this);
 
     // 待命
     EventListenerCustom* event_stand_by = EventListenerCustom::create("stand_by",
@@ -224,11 +238,11 @@ bool GameScene::moveto_by_tile(int x, int y, bool AI) {
                 _menu_game->clear_items();
                 _menu_game->setVisible(true);
                 _menu_game->add_item(GameMenu::ButtonType::STAND_BY);
-                _menu_game->setPosition(_robot->getPosition() + Vec2(constants::block_size * constants::scale, 0) - (this->getPosition() - _game_map_layer->getPosition()));
                 _game_status = GameStatus::MOVED;
             }
             // 聚焦机器人
             focuse_on(_robot);
+            _menu_game->setPosition(_robot->getPosition() + Vec2(constants::block_size * constants::scale, 0) - (this->getPosition() - _game_map_layer->getPosition()));
         }));
 
     Sequence* seq = Sequence::create(actions);
@@ -396,4 +410,10 @@ void GameScene::click_robot(EventCustom* event) {
     default:
         break;
     }
+}
+
+void GameScene::attack(EventCustom* event) {
+    _weapon_choose_layer->setVisible(true);
+    _weapon_choose_layer->setZOrder(_game_map_layer->getZOrder() + 1);
+
 }

@@ -27,7 +27,8 @@ bool GameMenu::init() {
 
     _menu_items.pushBack(MenuItemFont::create("攻击",
         [&](Ref* sender) {
-
+            EventCustom event("attack");
+            _eventDispatcher->dispatchEvent(&event);
         }));
 
     _menu_items.pushBack(MenuItemFont::create("待命",
